@@ -78,7 +78,7 @@ function App() {
           <>
             <p className="step">STEP 1 OF 2 · DEFINE YOUR ROLE</p>
 
-            <h1>Find the talent behind the CV.</h1>
+            <h1>See the evidence. Discover the potential.</h1>
 
             <p className="intro">
               Describe your role to explore relevant skills and transferable
