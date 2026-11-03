@@ -27,6 +27,10 @@ function ResultsPage({
   );
   const [showShortlistedOnly, setShowShortlistedOnly] = useState(false);
 
+  const shortlistedCount = candidates.filter((candidate) =>
+    shortlistedIds.includes(candidate.id),
+  ).length;
+
   const visibleCandidates = candidates.filter(
     (candidate) =>
       !showShortlistedOnly || shortlistedIds.includes(candidate.id),
@@ -39,26 +43,28 @@ function ResultsPage({
 
   return (
     <>
-      <p className="step">STEP 3 OF 3 · REVIEW CANDIDATES</p>
+      <p className="step">STEP 2 OF 2 · REVIEW CANDIDATES</p>
 
-      <h1>Explore candidate experience.</h1>
+      <h1>Explore the talent behind the experience.</h1>
 
       <p className="intro">
-        Reviewing for <strong>{jobTitle}</strong>
+        Reviewing for <strong>{jobTitle}</strong>. Explore skills, supporting
+        evidence and questions to follow up.
       </p>
 
-      <div className="demo-notice">
+      <div className="demo-notice" role="note">
         <strong>Demo preview</strong>
         <p>
-          These are fictional profiles with fixed electronics criteria. Your
-          selected files have not been uploaded or analyzed.
+          These fictional profiles use fixed electronics criteria to demonstrate
+          the review experience. They have not been matched against your job
+          requirements. Live candidate search will be available when the backend
+          is connected.
         </p>
       </div>
 
       <div className="results-toolbar">
         <p aria-live="polite">
-          {visibleCandidates.length} profiles · {shortlistedIds.length}{" "}
-          shortlisted
+          {visibleCandidates.length} profiles · {shortlistedCount} shortlisted
         </p>
 
         <label className="shortlist-filter">
@@ -74,14 +80,28 @@ function ResultsPage({
       <div className="results-layout">
         <section aria-label="Candidate list">
           {visibleCandidates.length === 0 ? (
-            <p className="empty-files">
-              No shortlisted candidates yet. Uncheck the filter to view all
-              profiles.
-            </p>
+            <div className="empty-files" role="status">
+              <p>
+                {showShortlistedOnly
+                  ? "Your shortlist is empty. Add candidates while reviewing their profiles."
+                  : "No candidates are available to review."}
+              </p>
+
+              {showShortlistedOnly && (
+                <button
+                  type="button"
+                  className="back-button"
+                  onClick={() => setShowShortlistedOnly(false)}
+                >
+                  View all candidates
+                </button>
+              )}
+            </div>
           ) : (
             <ul className="candidate-list">
               {visibleCandidates.map((candidate) => {
                 const isSelected = selectedCandidate?.id === candidate.id;
+                const isShortlisted = shortlistedIds.includes(candidate.id);
 
                 return (
                   <li key={candidate.id}>
@@ -104,7 +124,7 @@ function ResultsPage({
                         ))}
                       </span>
 
-                      {shortlistedIds.includes(candidate.id) && (
+                      {isShortlisted && (
                         <span className="shortlist-marker">Shortlisted</span>
                       )}
                     </button>
@@ -121,8 +141,12 @@ function ResultsPage({
             aria-label={`Details for ${selectedCandidate.name}`}
           >
             <p className="detail-eyebrow">CANDIDATE PROFILE</p>
+
             <h2>{selectedCandidate.name}</h2>
+
             <p className="candidate-headline">{selectedCandidate.headline}</p>
+
+            <p className="form-note">Candidate ID: {selectedCandidate.id}</p>
 
             <button
               type="button"
@@ -141,35 +165,47 @@ function ResultsPage({
             <h3>Requirement review</h3>
 
             <div className="criteria-list">
-              {selectedCandidate.criteria.map((criterion) => (
-                <article className="criterion" key={criterion.requirement}>
-                  <h4>{criterion.requirement}</h4>
+              {selectedCandidate.criteria.length === 0 ? (
+                <p className="missing-evidence">
+                  No requirement assessment is available for this profile yet.
+                </p>
+              ) : (
+                selectedCandidate.criteria.map((criterion) => (
+                  <article className="criterion" key={criterion.requirement}>
+                    <h4>{criterion.requirement}</h4>
 
-                  <span className={`assessment ${criterion.assessment}`}>
-                    {assessmentLabels[criterion.assessment]}
-                  </span>
+                    <span className={`assessment ${criterion.assessment}`}>
+                      {assessmentLabels[criterion.assessment]}
+                    </span>
 
-                  {criterion.evidence ? (
-                    <details>
-                      <summary>View example evidence</summary>
-                      <blockquote>{criterion.evidence}</blockquote>
-                    </details>
-                  ) : (
-                    <p className="missing-evidence">
-                      No evidence in this demo profile. Confirm during an
-                      interview.
-                    </p>
-                  )}
-                </article>
-              ))}
+                    {criterion.evidence ? (
+                      <details>
+                        <summary>View supporting evidence</summary>
+                        <blockquote>{criterion.evidence}</blockquote>
+                      </details>
+                    ) : (
+                      <p className="missing-evidence">
+                        No supporting evidence is provided. This needs
+                        confirmation and does not mean the candidate lacks the
+                        skill.
+                      </p>
+                    )}
+                  </article>
+                ))
+              )}
             </div>
+
+            <p className="form-note">
+              Use this review to support your assessment. Confirm important
+              requirements with the candidate before making a hiring decision.
+            </p>
           </section>
         )}
       </div>
 
       <div className="results-footer">
         <button type="button" className="back-button" onClick={onBack}>
-          ← Back to CV selection
+          ← Edit job requirements
         </button>
       </div>
     </>
